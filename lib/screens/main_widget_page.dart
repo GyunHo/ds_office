@@ -23,7 +23,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
       initialPage: ReportPage(),
       items: [
         KFDrawerItem.initWithPage(
-          text: Text('작업 보고서', style: TextStyle(color: Colors.white)),
+          text: Text('보고서 작성', style: TextStyle(color: Colors.white)),
           icon: Icon(Icons.library_books, color: Colors.white),
           page: ReportPage(),
         ),

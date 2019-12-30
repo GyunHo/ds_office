@@ -1,5 +1,6 @@
 import 'package:ds_office/db/bloc.dart';
 import 'package:ds_office/screens/auth_page.dart';
+import 'package:ds_office/screens/cloud_page.dart';
 import 'package:ds_office/screens/main_widget_page.dart';
 import 'package:ds_office/screens/report_page.dary.dart';
 import 'package:ds_office/screens/sensingmap_page.dart';
@@ -12,17 +13,21 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<FirebaseUser>(
       stream: FirebaseAuth.instance.onAuthStateChanged,
       builder: (context, snapshot) {
         if (snapshot.data == null) {
-          return MaterialApp(home: AuthPage(),debugShowCheckedModeBanner: false,);
+          return MaterialApp(
+            home: AuthPage(),
+            debugShowCheckedModeBanner: false,
+          );
         } else {
-          return ChangeNotifierProvider(
-            create: (context) => Bloc(),
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider<Bloc>(create: (_) => Bloc()),
+            ],
             child: MaterialApp(
               debugShowCheckedModeBanner: false,
               initialRoute: "main",
@@ -30,12 +35,12 @@ class MyApp extends StatelessWidget {
                 "main": (context) => MainWidget(),
                 "report": (context) => ReportPage(),
                 "sensing": (context) => SensingMap(),
+                "cloud": (context) => CloudPage(),
               },
             ),
           );
         }
       },
     );
-
   }
 }

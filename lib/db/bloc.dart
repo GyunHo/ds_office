@@ -4,13 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class Bloc extends ChangeNotifier {
-  final _inComingUril =
+  final _inComingUrl =
       'https://teamroom.nate.com/api/webhook/bdb7d4dc/fspw77bjrmRMwhS3ioE6j3NZ';
   final _spreadSheetUrl =
       'https://spreadsheets.google.com/feeds/list/1EdkkgNyOy0CgA9R09TuANll2_fWYPoKjAfiB79ynpsQ/od6/public/values?alt=json';
 
   sendMassage(String massage) async {
-    http.Response response = await http.post(_inComingUril,body: {'content':massage});
+    http.Response response = await http.post(_inComingUrl,body: {'content':massage});
     return response.statusCode;
   }
 

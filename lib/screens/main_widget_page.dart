@@ -1,3 +1,4 @@
+import 'package:ds_office/screens/cloud_page.dart';
 import 'package:ds_office/screens/report_page.dary.dart';
 import 'package:ds_office/screens/sensingmap_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,12 +28,14 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
           page: ReportPage(),
         ),
         KFDrawerItem.initWithPage(
-          text: Text(
-            '센싱',
-            style: TextStyle(color: Colors.white),
-          ),
+          text: Text('센싱', style: TextStyle(color: Colors.white)),
           icon: Icon(Icons.map, color: Colors.white),
           page: SensingMap(),
+        ),
+        KFDrawerItem.initWithPage(
+          text: Text('클라우드', style: TextStyle(color: Colors.white)),
+          icon: Icon(Icons.cloud, color: Colors.white),
+          page: CloudPage(),
         ),
       ],
     );
@@ -71,9 +74,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
             FirebaseAuth.instance.signOut();
           },
         ),
-        decoration: BoxDecoration(
-       color: Colors.black87
-        ),
+        decoration: BoxDecoration(color: Colors.black87),
       ),
     );
   }

@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ds_office/db/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kf_drawer/kf_drawer.dart';
+import 'package:provider/provider.dart';
 
 class CloudPage extends KFDrawerContent {
   @override
@@ -9,21 +11,40 @@ class CloudPage extends KFDrawerContent {
 }
 
 class _CloudPageState extends State<CloudPage> {
+  String userId;
+
+  @override
+  void initState() {
+    FirebaseAuth.instance.currentUser().then((FirebaseUser user) {
+      setState(() {
+        userId = user.uid;
+      });
+    });
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bloc = Provider.of<Bloc>(context);
     return Scaffold(
       appBar: AppBar(
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.add),
-            onPressed: () {
-              Firestore.instance
-                  .runTransaction((Transaction transaction) async {
-                CollectionReference reference =
-                Firestore.instance.collection('documents');
-                await reference
-                    .add({'title': '', 'editing': false, 'score': 0});
-              });
+            onPressed: () async {
+              bloc.addReport('test', '시험입니다.');
+
+//              FirebaseUser _user = await FirebaseAuth.instance.currentUser();
+//              String uid = _user.uid;
+//              Firestore.instance
+//                  .runTransaction((Transaction transaction) async {
+//                CollectionReference reference =
+//                    Firestore.instance.collection('documents');
+//
+//                await reference.add(
+//                    {'title': '', 'editing': false, 'score': 0, 'uid': uid});
+//              });
             },
           )
         ],
@@ -75,33 +96,31 @@ class FirestoreListView extends StatelessWidget {
                   child: !documents[index].data['editing']
                       ? Text(title)
                       : TextFormField(
-                    initialValue: title,
-                    onFieldSubmitted: (String val) {
-                      Firestore.instance.runTransaction((
-                          Transaction transtion) async {
-                        DocumentSnapshot snapshot = await transtion.get(
-                            documents[index].reference);
-                        await transtion.update(snapshot.reference, {
-                          'title': val,
-                          'editing': !documents[index].data['editing']
-                        });
-                      });
-                    },
-                  ),
+                          initialValue: title,
+                          onFieldSubmitted: (String val) {
+                            Firestore.instance.runTransaction(
+                                (Transaction transaction) async {
+                              DocumentSnapshot snapshot = await transaction
+                                  .get(documents[index].reference);
+                              await transaction.update(snapshot.reference, {
+                                'title': val,
+                                'editing': !documents[index].data['editing']
+                              });
+                            });
+                          },
+                        ),
                 ),
               ],
             ),
           ),
-          onTap: () =>
-              Firestore.instance
-                  .runTransaction((Transaction transaction) async {
-                DocumentSnapshot snapshot =
+          onTap: () => Firestore.instance
+              .runTransaction((Transaction transaction) async {
+            DocumentSnapshot snapshot =
                 await transaction.get(documents[index].reference);
 
-                await transaction
-                    .update(
-                    snapshot.reference, {'editing': !snapshot['editing']});
-              }),
+            await transaction
+                .update(snapshot.reference, {'editing': !snapshot['editing']});
+          }),
         );
       },
     );

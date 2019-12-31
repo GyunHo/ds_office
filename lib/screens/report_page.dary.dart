@@ -99,7 +99,7 @@ class _ReportPageState extends State<ReportPage> {
                       ),
                       InkWell(
                           onTap: () {
-                            bloc.sendMassage(_textEditingController.text);
+//                            bloc.sendMassage(_textEditingController.text);
 
                             Scaffold.of(context).showSnackBar(SnackBar(
                               duration: Duration(milliseconds: 500),

@@ -15,6 +15,7 @@ class _ReportPageState extends State<ReportPage> {
   Future<FirebaseUser> user = FirebaseAuth.instance.currentUser();
 
   Map<String, String> work;
+  String title;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +28,7 @@ class _ReportPageState extends State<ReportPage> {
                 icon: Icon(Icons.delete),
                 onPressed: () {
                   _textEditingController.clear();
+                  title = '';
                 })
           ],
           backgroundColor: Colors.black,
@@ -72,6 +74,7 @@ class _ReportPageState extends State<ReportPage> {
                                   child: Text(title), value: title);
                             }).toList(),
                             onChanged: (value) {
+                              title = value;
                               _textEditingController.text =
                                   snapshot.data[value];
                             },
@@ -99,12 +102,20 @@ class _ReportPageState extends State<ReportPage> {
                       ),
                       InkWell(
                           onTap: () {
+                            bloc
+                                .addReport(
+                                    title: title == "" ? "분류없음" : title,
+                                    document: _textEditingController.text)
+                                .whenComplete(() {
+                              _textEditingController.clear();
+                              return Scaffold.of(context).showSnackBar(SnackBar(
+                                duration: Duration(milliseconds: 500),
+                                content: Text("내용 복사/전송완료"),
+                              ));
 //                            bloc.sendMassage(_textEditingController.text);
-
-                            Scaffold.of(context).showSnackBar(SnackBar(
-                              duration: Duration(milliseconds: 500),
-                              content: Text("내용 복사/전송완료"),
-                            ));
+                            }).catchError((e) {
+                              print(e);
+                            });
 
                             Clipboard.setData(ClipboardData(
                                 text: _textEditingController.text));
@@ -134,6 +145,5 @@ class _ReportPageState extends State<ReportPage> {
             }
           },
         ));
-    ;
   }
 }

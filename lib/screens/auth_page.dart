@@ -1,4 +1,4 @@
-
+import 'package:ds_office/db/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +18,6 @@ class _AuthPageState extends State<AuthPage> {
   Widget build(BuildContext context) {
     Size sise = MediaQuery.of(context).size;
 
-
     return Scaffold(
       key: _globalKey,
       body: SafeArea(
@@ -29,8 +28,13 @@ class _AuthPageState extends State<AuthPage> {
             child: Column(
               children: <Widget>[
                 Flexible(
-                  child: Image(
-                    image: AssetImage('assets/login.gif'),
+                  child: InkWell(
+                    onTap: () {
+                      Bloc().joinUser(context);
+                    },
+                    child: Image(
+                      image: AssetImage('assets/login.gif'),
+                    ),
                   ),
                 ),
                 Padding(
@@ -48,7 +52,7 @@ class _AuthPageState extends State<AuthPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: <Widget>[
                                 TextFormField(
-                                  keyboardType:TextInputType.emailAddress ,
+                                  keyboardType: TextInputType.emailAddress,
                                   decoration: InputDecoration(
                                       labelText: "아이디",
                                       icon: Icon(Icons.perm_identity),
@@ -66,25 +70,25 @@ class _AuthPageState extends State<AuthPage> {
                                 SizedBox(
                                   height: 20.0,
                                 ),
-                                Material(
+                                RaisedButton(
+                                  padding: EdgeInsets.all(10.0),
                                   color: Colors.black,
+                                  textColor: Colors.white,
                                   shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(25)),
-                                  elevation: 8.0,
-                                  child: FlatButton(
-                                    onPressed: () {
-                                      FirebaseAuth.instance
-                                          .signInWithEmailAndPassword(
-                                              email: _idController.text,
-                                              password:
-                                                  _passwordController.text);
-                                    },
-                                    child: Text(
-                                      "로그인",
-                                      style: TextStyle(fontSize: 15.0,color: Colors.white),
-                                    ),
+                                      borderRadius:
+                                          BorderRadius.circular(12.0)),
+                                  onPressed: () async {
+                                    await FirebaseAuth.instance
+                                        .signInWithEmailAndPassword(
+                                            email: _idController.text,
+                                            password: _passwordController.text);
+                                  },
+                                  child: Text(
+                                    "로그인",
+                                    style: TextStyle(
+                                        fontSize: 15.0, color: Colors.white),
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           ),

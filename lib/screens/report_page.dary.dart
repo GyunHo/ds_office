@@ -16,7 +16,7 @@ class _ReportPageState extends State<ReportPage> {
   Future<FirebaseUser> user = FirebaseAuth.instance.currentUser();
 
   Map<String, String> work;
-  String title='';
+  String title = '';
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,8 @@ class _ReportPageState extends State<ReportPage> {
               icon: Icon(Icons.camera_enhance),
               onPressed: () {
                 bloc.clearBarCodes();
-                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ScanPage()));
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => ScanPage()));
               },
             )
           ],
@@ -112,15 +113,17 @@ class _ReportPageState extends State<ReportPage> {
                           onTap: () {
                             bloc
                                 .addReport(
-                                    title: title == "" ? "분류없음" : title,
-                                    document: _textEditingController.text??'내용없음')
+                                    title:
+                                        title == "" ? "분류없음" : title ?? '분류없음',
+                                    document:
+                                        _textEditingController.text ?? '내용없음')
                                 .whenComplete(() {
+                              bloc.sendTeamRoom(_textEditingController.text);
                               _textEditingController.clear();
                               return Scaffold.of(context).showSnackBar(SnackBar(
                                 duration: Duration(milliseconds: 500),
                                 content: Text("내용 복사/전송완료"),
                               ));
-//                            bloc.sendMassage(_textEditingController.text);
                             }).catchError((e) {
                               print(e);
                             });

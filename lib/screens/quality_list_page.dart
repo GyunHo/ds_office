@@ -13,9 +13,16 @@ class _QualityCheckPageState extends State<QualityListPage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.black,
-        onPressed: () {
-
-          Navigator.of(context).pushNamed('qualitycheck');
+        onPressed: () async {
+          await Navigator.of(context).pushNamed('qualitycheck').then((val) {
+            if (val) {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text('저장 됐습니다.'),
+              ));
+            }
+          }).catchError((e){
+            print("저장 실패 했는데 원래 페이지로 왜돌아왔지?");
+          });
         },
         child: Icon(
           Icons.add,
@@ -35,7 +42,7 @@ class _QualityCheckPageState extends State<QualityListPage> {
         ),
       ),
       body: StreamBuilder(
-        stream: Firestore.instance.collection('checklist').snapshots(),
+        stream: Firestore.instance.collection('checklist').orderBy('점검일',descending: true).snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData)
             return Center(
@@ -46,14 +53,17 @@ class _QualityCheckPageState extends State<QualityListPage> {
             child: Column(
               children: <Widget>[
                 TextField(
+                  enabled: false,
                   decoration: InputDecoration(
                       hintText: "국소명 검색",
-                      labelText: "국소명",
+                      labelText: "구현예정",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
                           borderSide: BorderSide(color: Colors.black))),
                 ),
-                SizedBox(height: 10.0,),
+                SizedBox(
+                  height: 10.0,
+                ),
                 Expanded(
                   child: ListView.builder(
                       itemCount: snapshot.data.documents.length,
@@ -61,6 +71,7 @@ class _QualityCheckPageState extends State<QualityListPage> {
                         DocumentSnapshot docs = snapshot.data.documents[index];
                         Timestamp time = docs.data['점검일'];
                         return Card(
+                          color: docs.data['최종결과']!="양호"?Colors.red.withOpacity(0.5):Colors.blue,
                           elevation: 5.0,
                           child: ListTile(
                             title: Row(
@@ -73,8 +84,12 @@ class _QualityCheckPageState extends State<QualityListPage> {
                             subtitle: Padding(
                               padding: const EdgeInsets.only(top: 8.0),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: <Widget>[Text('${time?.toDate()??'noDate'}'),Text('${docs.data['결과']}')],
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Text('${time?.toDate() ?? 'noDate'}'),
+                                  Text('${docs.data['최종결과']}')
+                                ],
                               ),
                             ),
                           ),

@@ -17,7 +17,8 @@ class Bloc extends ChangeNotifier {
   String _barCodes = '';
 
   String getBarCodes() => _barCodes;
-  void clearBarCodes()=>_barCodes='';
+
+  void clearBarCodes() => _barCodes = '';
 
   void setBarCodes(String barcode) {
     if (!_barCodes.contains(barcode)) {
@@ -207,6 +208,7 @@ class Bloc extends ChangeNotifier {
                 onPressed: () async {
                   await updateReport(document, controller.text.toString())
                       .whenComplete(() {
+                    sendTeamRoom(controller.text.toString());
                     Navigator.pop(context, "수정 완료");
                   }).catchError((e) {
                     print('내용 수정오류 : $e');

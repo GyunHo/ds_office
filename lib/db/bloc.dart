@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -15,6 +14,17 @@ class Bloc extends ChangeNotifier {
       'https://spreadsheets.google.com/feeds/list/1EdkkgNyOy0CgA9R09TuANll2_fWYPoKjAfiB79ynpsQ/od6/public/values?alt=json';
   List<DocumentSnapshot> _snapshots;
   static GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String _barCodes = '';
+
+  String getBarCodes() => _barCodes;
+  void clearBarCodes()=>_barCodes='';
+
+  void setBarCodes(String barcode) {
+    if (!_barCodes.contains(barcode)) {
+      _barCodes += '$barcode\n';
+      notifyListeners();
+    }
+  }
 
   Future<void> joinUser(BuildContext context) async {
     Map<String, dynamic> userInfo = {'auth': false};

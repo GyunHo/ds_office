@@ -1,4 +1,5 @@
 import 'package:ds_office/db/bloc.dart';
+import 'package:ds_office/screens/barcode_scan_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +16,7 @@ class _ReportPageState extends State<ReportPage> {
   Future<FirebaseUser> user = FirebaseAuth.instance.currentUser();
 
   Map<String, String> work;
-  String title;
+  String title='';
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,14 @@ class _ReportPageState extends State<ReportPage> {
                 onPressed: () {
                   _textEditingController.clear();
                   title = '';
-                })
+                }),
+            IconButton(
+              icon: Icon(Icons.camera_enhance),
+              onPressed: () {
+                bloc.clearBarCodes();
+                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ScanPage()));
+              },
+            )
           ],
           backgroundColor: Colors.black,
           title: Text(
@@ -105,7 +113,7 @@ class _ReportPageState extends State<ReportPage> {
                             bloc
                                 .addReport(
                                     title: title == "" ? "분류없음" : title,
-                                    document: _textEditingController.text)
+                                    document: _textEditingController.text??'내용없음')
                                 .whenComplete(() {
                               _textEditingController.clear();
                               return Scaffold.of(context).showSnackBar(SnackBar(
@@ -123,7 +131,7 @@ class _ReportPageState extends State<ReportPage> {
                           child: Card(
                             child: SizedBox(
                               child: Center(
-                                child: Text("복사"),
+                                child: Text("내용 복사 / 전송"),
                               ),
                               height: MediaQuery.of(context).size.height * 0.08,
                               width: double.infinity,

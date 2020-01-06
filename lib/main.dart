@@ -1,7 +1,10 @@
 import 'package:ds_office/db/bloc.dart';
+import 'package:ds_office/db/quality_check_bloc.dart';
 import 'package:ds_office/screens/auth_page.dart';
 import 'package:ds_office/screens/cloud_page.dart';
 import 'package:ds_office/screens/main_widget_page.dart';
+import 'package:ds_office/screens/quality_check_page.dart';
+import 'package:ds_office/screens/quality_list_page.dart';
 import 'package:ds_office/screens/report_page.dary.dart';
 import 'package:ds_office/screens/sensingmap_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,6 +30,7 @@ class MyApp extends StatelessWidget {
           return MultiProvider(
             providers: [
               ChangeNotifierProvider<Bloc>(create: (_) => Bloc()),
+              ChangeNotifierProvider<QualityCheckBloc>(create: (_)=>QualityCheckBloc())
             ],
             child: MaterialApp(
               debugShowCheckedModeBanner: false,
@@ -36,6 +40,7 @@ class MyApp extends StatelessWidget {
                 "report": (context) => ReportPage(),
                 "sensing": (context) => SensingMap(),
                 "cloud": (context) => CloudPage(),
+                "qualitycheck":(context)=>QualityCheckPage(),
               },
             ),
           );

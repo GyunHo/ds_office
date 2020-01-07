@@ -208,7 +208,8 @@ class Bloc extends ChangeNotifier {
                 onPressed: () async {
                   await updateReport(document, controller.text.toString())
                       .whenComplete(() {
-                    sendTeamRoom(controller.text.toString());
+                        String newMassage = '/////내용수정발생/////\n'+'${controller.text.toString()}';
+                    sendTeamRoom(newMassage);
                     Navigator.pop(context, "수정 완료");
                   }).catchError((e) {
                     print('내용 수정오류 : $e');

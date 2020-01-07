@@ -12,6 +12,7 @@ class QualityCheckPage extends StatefulWidget {
 
 class _QualityCheckPageState extends State<QualityCheckPage> {
   static GlobalKey<FormState> _globalKey = GlobalKey<FormState>();
+  GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
   List<String> _check;
   Map<String, dynamic> data = {};
   String name;
@@ -48,6 +49,7 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
   Widget build(BuildContext context) {
     final bloc = Provider.of<QualityCheckBloc>(context);
     return Scaffold(
+      key: _scaffoldState,
         appBar: AppBar(
           backgroundColor: Colors.black,
           centerTitle: true,
@@ -74,7 +76,7 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
                     if (res == "성공") {
                       Navigator.pop(context, true);
                     } else {
-                      Scaffold.of(context).showSnackBar(SnackBar(
+                      _scaffoldState.currentState.showSnackBar(SnackBar(
                         content: Text('저장에 실패 하였습니다.'),
                       ));
                     }

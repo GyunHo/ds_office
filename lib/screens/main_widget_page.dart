@@ -44,7 +44,6 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
           icon: Icon(Icons.cloud, color: Colors.white),
           page: CloudPage(),
         ),
-
       ],
     );
   }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -8,6 +9,10 @@ class QualityCheckBloc extends ChangeNotifier {
       'https://spreadsheets.google.com/feeds/list/1leg0EydCOkzSMoDgWe9ac9PYLK_msjgrT9sV9SQFkjk/od6/public/values?alt=json';
   String _inComingUrl =
       'https://teamroom.nate.com/api/webhook/6c16f7a3/gmFLfSSH3g3N1oSCflGy3pdD';
+  String _userName='';
+
+  getCurrentUserName() => _userName;
+  setCurrentUserName(String name) =>_userName=name;
 
   sendTeamRoom(String massage) async {
     http.Response response =
@@ -27,6 +32,7 @@ class QualityCheckBloc extends ChangeNotifier {
   Future<String> getUserName(String uid) async {
     DocumentSnapshot snapshot =
         await Firestore.instance.collection('users').document(uid).get();
+
 
     return snapshot.data['name'] ?? "이름없음";
   }
@@ -71,7 +77,7 @@ class QualityCheckBloc extends ChangeNotifier {
         res = "성공";
       }
 
-      if (dummy['최종결과'] == '양호'&& badMassage == '') {
+      if (dummy['최종결과'] == '양호' && badMassage == '') {
         String sendOkMassage = reporterInfo;
         sendOkMassage += '점검결과 = 전체 양호';
         sendTeamRoom(sendOkMassage);

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ds_office/db/quality_check_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +14,7 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
   GlobalKey<ScaffoldState> _scaffoldState = GlobalKey<ScaffoldState>();
   List<String> _check;
   Map<String, dynamic> data = {};
-  String name;
-  String uid;
+  String uid, name;
 
   @override
   void initState() {
@@ -49,12 +47,12 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
   Widget build(BuildContext context) {
     final bloc = Provider.of<QualityCheckBloc>(context);
     return Scaffold(
-      key: _scaffoldState,
+        key: _scaffoldState,
         appBar: AppBar(
           backgroundColor: Colors.black,
           centerTitle: true,
           title: Text(
-            '품질점검',
+            '체크리스트',
             style: TextStyle(color: Colors.white),
           ),
           leading: IconButton(
@@ -70,7 +68,7 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
                 onPressed: () async {
                   _globalKey.currentState.save();
                   data['점검일'] = DateTime.now();
-                  data['점검자'] = name;
+                  data['점검자'] = bloc.getCurrentUserName();
 
                   await bloc.addCheckList(data).then((res) {
                     if (res == "성공") {

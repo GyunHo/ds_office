@@ -68,7 +68,8 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
                 onPressed: () async {
                   _globalKey.currentState.save();
                   data['점검일'] = DateTime.now();
-                  data['점검자'] = bloc.getCurrentUserName();
+                  data['점검자'] = name;
+                  data['수정중'] = false;
 
                   await bloc.addCheckList(data).then((res) {
                     if (res == "성공") {
@@ -80,9 +81,10 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
                     }
                   });
                 },
-                child: Text('저장'),
-                color: Colors.blue,
+                child: Text('점검저장'),
+                color: Colors.white,
                 shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Colors.grey),
                     borderRadius: BorderRadius.circular(16.0)),
               ),
             )
@@ -135,10 +137,13 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
                                   subtitle: Column(
                                     children: <Widget>[
                                       CustomRadioButton(
+                                        customShape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10.0)
+                                        ),
                                         buttonColor: Colors.white,
                                         selectedColor: Colors.redAccent,
-                                        buttonLables: ['양호', '불량', '조치'],
-                                        buttonValues: ['양호', '불량', '조치'],
+                                        buttonLables: ['양호', '불량', '현장조치'],
+                                        buttonValues: ['양호', '불량', '현장조치'],
                                         radioButtonValue: (val) {
                                           maps['점검결과'] = val;
                                         },

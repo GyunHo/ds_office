@@ -12,7 +12,37 @@ class QualityListPage extends KFDrawerContent {
 }
 
 class _QualityCheckPageState extends State<QualityListPage> {
+  List<DocumentSnapshot> filterLists = List<DocumentSnapshot>();
+  TextEditingController _textEditingController = TextEditingController();
 
+  void queryFilter(QuerySnapshot snapshot, String query) {
+    filterLists.clear();
+    List<DocumentSnapshot> documentSnapshot = snapshot.documents;
+    for (var i in documentSnapshot) {
+      if (i.data["국소명"].toString().contains(query)) {
+        filterLists.add(i);
+      }
+    }
+  }
+
+  Color switchColor(String res) {
+    Color color;
+    switch (res) {
+      case "양호":
+        color = Colors.white;
+        break;
+      case "불량":
+        color = Colors.red.withOpacity(0.6);
+        break;
+      case "현장조치":
+        color = Colors.yellow.withOpacity(0.6);
+        break;
+      case "조치완료":
+        color = Colors.blue.withOpacity(0.6);
+        break;
+    }
+    return color;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,15 +67,6 @@ class _QualityCheckPageState extends State<QualityListPage> {
         ),
       ),
       appBar: AppBar(
-        actions: <Widget>[
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.menu,
-              color: Colors.white,
-            ),
-          ),
-        ],
         centerTitle: true,
         title: Text('품질점검'),
         backgroundColor: Colors.black,
@@ -63,6 +84,8 @@ class _QualityCheckPageState extends State<QualityListPage> {
             .orderBy('점검일', descending: true)
             .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          List<DocumentSnapshot> documents = _textEditingController.text.isEmpty?snapshot.data?.documents:filterLists;
+
           if (!snapshot.hasData)
             return Center(
               child: CircularProgressIndicator(),
@@ -72,10 +95,16 @@ class _QualityCheckPageState extends State<QualityListPage> {
             child: Column(
               children: <Widget>[
                 TextField(
-                  enabled: false,
+                  controller: _textEditingController,
+                  onChanged: (query) {
+                    setState(() {
+                      queryFilter(snapshot.data, query);
+                    });
+
+                  },
                   decoration: InputDecoration(
                       hintText: "국소명 검색",
-                      labelText: "구현예정",
+                      labelText: "국소명",
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
                           borderSide: BorderSide(color: Colors.black))),
@@ -85,23 +114,32 @@ class _QualityCheckPageState extends State<QualityListPage> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                      itemCount: snapshot.data.documents.length,
+                      itemCount: documents.length,
                       itemBuilder: (BuildContext context, int index) {
-                        DocumentSnapshot docs = snapshot.data.documents[index];
+                        DocumentSnapshot docs = documents[index];
                         Timestamp time = docs.data['점검일'];
                         return Card(
-                          color: docs.data['최종결과'] != "양호"
-                              ? Colors.red.withOpacity(0.5)
-                              : Colors.blue,
+                          color: switchColor(docs.data['최종결과']),
                           elevation: 5.0,
                           child: ListTile(
                             onTap: () async {
+                              await Firestore.instance.runTransaction(
+                                  (Transaction transaction) async {
+                                await transaction
+                                    .update(docs.reference, {"수정중": true});
+                              });
                               await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                       builder: (_) => QualityResultDetail(
                                             qualityResult: docs,
-                                          )));
+                                          ))).then((res) {
+                                if (res ?? false) {
+                                  Scaffold.of(context).showSnackBar(SnackBar(
+                                    content: Text("조치 완료 됐습니다."),
+                                  ));
+                                }
+                              });
                             },
                             title: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,

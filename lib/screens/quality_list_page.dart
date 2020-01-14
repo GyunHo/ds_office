@@ -84,7 +84,9 @@ class _QualityCheckPageState extends State<QualityListPage> {
             .orderBy('점검일', descending: true)
             .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          List<DocumentSnapshot> documents = _textEditingController.text.isEmpty?snapshot.data?.documents:filterLists;
+          List<DocumentSnapshot> documents = _textEditingController.text.isEmpty
+              ? snapshot.data?.documents
+              : filterLists;
 
           if (!snapshot.hasData)
             return Center(
@@ -100,7 +102,6 @@ class _QualityCheckPageState extends State<QualityListPage> {
                     setState(() {
                       queryFilter(snapshot.data, query);
                     });
-
                   },
                   decoration: InputDecoration(
                       hintText: "국소명 검색",
@@ -122,6 +123,28 @@ class _QualityCheckPageState extends State<QualityListPage> {
                           color: switchColor(docs.data['최종결과']),
                           elevation: 5.0,
                           child: ListTile(
+                            onLongPress: () async {
+                              await ask().then((res) async {
+                                if (res) {
+                                  await Firestore.instance.runTransaction(
+                                      (Transaction transaction) async {
+                                    await transaction
+                                        .delete(docs.reference)
+                                        .whenComplete(() {
+                                      return Scaffold.of(context)
+                                          .showSnackBar(SnackBar(
+                                        content: Text("삭제 완료"),
+                                      ));
+                                    }).catchError(() {
+                                      return Scaffold.of(context)
+                                          .showSnackBar(SnackBar(
+                                        content: Text("삭제 오류"),
+                                      ));
+                                    });
+                                  });
+                                }
+                              });
+                            },
                             onTap: () async {
                               await Firestore.instance.runTransaction(
                                   (Transaction transaction) async {
@@ -169,5 +192,54 @@ class _QualityCheckPageState extends State<QualityListPage> {
         },
       ),
     );
+  }
+
+  Future<bool> ask() async {
+    bool res = false;
+    await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0)),
+            title: Text("삭제 하시겠습니까?"),
+            actions: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0)),
+                  color: Colors.grey,
+                  child: Text(
+                    "취소",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0)),
+                  color: Colors.red,
+                  child: Text(
+                    "삭제",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                ),
+              ),
+            ],
+          );
+        }).then((result) {
+      res = result ?? false;
+    });
+
+    return res;
   }
 }

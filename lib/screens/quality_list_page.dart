@@ -135,13 +135,15 @@ class _QualityCheckPageState extends State<QualityListPage> {
                                           .showSnackBar(SnackBar(
                                         content: Text("삭제 완료"),
                                       ));
-                                    }).catchError(() {
+                                    }).catchError((e) {
                                       return Scaffold.of(context)
                                           .showSnackBar(SnackBar(
                                         content: Text("삭제 오류"),
                                       ));
                                     });
                                   });
+                                } else {
+                                  return null;
                                 }
                               });
                             },

@@ -1,4 +1,5 @@
 import 'package:ds_office/db/quality_check_bloc.dart';
+import 'package:ds_office/screens/build_report_page.dart';
 import 'package:ds_office/screens/cloud_page.dart';
 import 'package:ds_office/screens/quality_list_page.dart';
 import 'package:ds_office/screens/report_page.dary.dart';
@@ -43,6 +44,11 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
           text: Text('클라우드', style: TextStyle(color: Colors.white)),
           icon: Icon(Icons.cloud, color: Colors.white),
           page: CloudPage(),
+        ),
+        KFDrawerItem.initWithPage(
+          text: Text('시설내역서', style: TextStyle(color: Colors.white)),
+          icon: Icon(Icons.receipt, color: Colors.white),
+          page: BuildReport(),
         ),
       ],
     );

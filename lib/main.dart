@@ -1,6 +1,7 @@
 import 'package:ds_office/db/bloc.dart';
 import 'package:ds_office/db/quality_check_bloc.dart';
 import 'package:ds_office/screens/auth_page.dart';
+import 'package:ds_office/screens/build_report_page.dart';
 import 'package:ds_office/screens/cloud_page.dart';
 import 'package:ds_office/screens/main_widget_page.dart';
 import 'package:ds_office/screens/quality_check_page.dart';
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
                 "cloud": (context) => CloudPage(),
                 "qualitycheck":(context)=>QualityCheckPage(),
                 "qualityresultdetail":(context)=>QualityResultDetail(),
+                "buildreport":(context)=>BuildReport()
               },
             ),
           );

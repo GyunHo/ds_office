@@ -17,6 +17,7 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
+  find_dropdown:
   location:
   grouped_buttons:
   custom_radio_grouped_button:

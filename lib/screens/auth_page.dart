@@ -2,7 +2,6 @@ import 'package:ds_office/db/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-
 class AuthPage extends StatefulWidget {
   @override
   _AuthPageState createState() => _AuthPageState();
@@ -81,7 +80,13 @@ class _AuthPageState extends State<AuthPage> {
                                     await FirebaseAuth.instance
                                         .signInWithEmailAndPassword(
                                             email: _idController.text,
-                                            password: _passwordController.text);
+                                            password: _passwordController.text)
+                                        .catchError((e) {
+                                      _globalKey.currentState
+                                          .showSnackBar(SnackBar(
+                                        content: Text('아이디 또는 비밀번호를 확인하세요'),
+                                      ));
+                                    });
                                   },
                                   child: Text(
                                     "로그인",

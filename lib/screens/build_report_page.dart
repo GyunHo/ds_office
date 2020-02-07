@@ -11,6 +11,11 @@ class _BuildReportState extends State<BuildReport> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text(
+          '시설내역서',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.black,
         leading: IconButton(
           onPressed: widget.onMenuPressed,
           icon: Icon(Icons.menu),

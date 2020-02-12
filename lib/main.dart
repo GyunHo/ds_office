@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ds_office/db/bloc.dart';
 import 'package:ds_office/db/quality_check_bloc.dart';
+import 'package:ds_office/screens/auth_ask_page.dart';
 import 'package:ds_office/screens/auth_page.dart';
 import 'package:ds_office/screens/build_report_page.dart';
 import 'package:ds_office/screens/cloud_page.dart';
@@ -28,24 +30,41 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
           );
         } else {
-          return MultiProvider(
-            providers: [
-              ChangeNotifierProvider<Bloc>(create: (_) => Bloc()),
-              ChangeNotifierProvider<QualityCheckBloc>(create: (_)=>QualityCheckBloc())
-            ],
-            child: MaterialApp(
-              debugShowCheckedModeBanner: false,
-              initialRoute: "main",
-              routes: {
-                "main": (context) => MainWidget(),
-                "report": (context) => ReportPage(),
-                "sensing": (context) => SensingMap(),
-                "cloud": (context) => CloudPage(),
-                "qualitycheck":(context)=>QualityCheckPage(),
-                "qualityresultdetail":(context)=>QualityResultDetail(),
-                "buildreport":(context)=>BuildReport()
-              },
-            ),
+          String uid = snapshot.data.uid;
+          return StreamBuilder<DocumentSnapshot>(
+            stream: Firestore.instance
+                .collection('users')
+                .document(uid)
+                .snapshots(),
+            builder: (context, snap) {
+              if (snap.data['auth']??false) {
+                return MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider<Bloc>(create: (_) => Bloc()),
+                    ChangeNotifierProvider<QualityCheckBloc>(
+                        create: (_) => QualityCheckBloc())
+                  ],
+                  child: MaterialApp(
+                    debugShowCheckedModeBanner: false,
+                    initialRoute: "main",
+                    routes: {
+                      "main": (context) => MainWidget(),
+                      "report": (context) => ReportPage(),
+                      "sensing": (context) => SensingMap(),
+                      "cloud": (context) => CloudPage(),
+                      "qualitycheck": (context) => QualityCheckPage(),
+                      "qualityresultdetail": (context) => QualityResultDetail(),
+                      "buildreport": (context) => BuildReport()
+                    },
+                  ),
+                );
+              } else {
+                return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  home: AskAuth(),
+                );
+              }
+            },
           );
         }
       },

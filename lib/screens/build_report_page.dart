@@ -18,7 +18,6 @@ class _BuildReportState extends State<BuildReport> {
   GlobalKey<FormState> _formkey = GlobalKey<FormState>();
 
   Map<String, Widget> widgetList = {};
-
   List<String> element;
   List<String> materials;
   List<List> selectedMaterials = [];
@@ -35,7 +34,6 @@ class _BuildReportState extends State<BuildReport> {
         );
       }
     });
-
     super.initState();
   }
 

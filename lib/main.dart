@@ -36,8 +36,8 @@ class MyApp extends StatelessWidget {
                 .collection('users')
                 .document(uid)
                 .snapshots(),
-            builder: (context, snap) {
-              if (snap.data['auth']??false) {
+            builder: (BuildContext con, AsyncSnapshot snap) {
+              if (snap?.data['auth']??false) {
                 return MultiProvider(
                   providers: [
                     ChangeNotifierProvider<Bloc>(create: (_) => Bloc()),

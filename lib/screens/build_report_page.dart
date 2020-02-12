@@ -1,5 +1,6 @@
 import 'dart:convert';
-
+import 'package:fab_circular_menu/fab_circular_menu.dart';
+import 'package:qrscan/qrscan.dart' as scan;
 import 'package:animated_multi_select/animated_multi_select.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:kf_drawer/kf_drawer.dart';
@@ -13,6 +14,7 @@ class BuildReport extends KFDrawerContent {
 }
 
 class _BuildReportState extends State<BuildReport> {
+  int device = 4;
   String url =
       'https://spreadsheets.google.com/feeds/cells/1mWP4vOOjxK5aZNJFsTRzoUURXVISkQcTUC0FY7ym17I/1/public/full?alt=json';
   GlobalKey<FormState> _formkey = GlobalKey<FormState>();
@@ -20,8 +22,9 @@ class _BuildReportState extends State<BuildReport> {
   Map<String, Widget> widgetList = {};
   List<String> element;
   List<String> materials;
-  List<List> selectedMaterials = [];
   List<List> selectedMaterialsControllers = [];
+  List<String> checkedData = [];
+  List<List> selectedMaterialsData = [];
   Map<String, dynamic> soloData = {};
 
   @override
@@ -39,24 +42,50 @@ class _BuildReportState extends State<BuildReport> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black,
-        focusColor: Colors.grey,
-        child: Text(
-          '추가',
-          style: TextStyle(color: Colors.white),
-        ),
-        onPressed: () {
-          addMaterials();
-        },
+      floatingActionButton: FabCircularMenu(
+        ringColor: Colors.black.withOpacity(0.1),
+        fabColor: Colors.black,
+        fabOpenColor: Colors.red,
+        fabMargin: EdgeInsets.all(10.0),
+        child: Container(),
+        options: [
+          FloatingActionButton(
+            onPressed: () {
+              addMaterials("설치");
+            },
+            child: Text(
+              '설치',
+              style: TextStyle(color: Colors.black),
+            ),
+            backgroundColor: Colors.greenAccent,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              addMaterials("철거");
+            },
+            child: Text(
+              '철거',
+              style: TextStyle(color: Colors.black),
+            ),
+            backgroundColor: Colors.greenAccent,
+          ),
+        ],
+        ringDiameter: size.width * 0.8,
+        ringWidth: size.width * 0.25,
       ),
       appBar: AppBar(
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: RaisedButton(
-              onPressed: () {},
+              onPressed: () {
+                _formkey.currentState.save();
+                print('리스트 : $selectedMaterialsData');
+                print('체크 : $checkedData');
+                print('솔로 : $soloData');
+              },
               child: Text(
                 '저장',
               ),
@@ -110,7 +139,9 @@ class _BuildReportState extends State<BuildReport> {
                         borderRadius: BorderRadius.circular(10),
                         borderWidth: 2,
                         mainList: element,
-                        onSelectionChanged: (selectedList) {},
+                        onSelectionChanged: (selectedList) {
+                          checkedData = selectedList;
+                        },
                         widgetList: widgetList,
                         initialSelectionList: [],
                       ),
@@ -123,7 +154,7 @@ class _BuildReportState extends State<BuildReport> {
                                 thickness: 2.0,
                               );
                             },
-                            itemCount: selectedMaterials.length,
+                            itemCount: selectedMaterialsData.length,
                             itemBuilder: (context, index) {
                               return InkWell(
                                 child: selectItem(index),
@@ -143,27 +174,51 @@ class _BuildReportState extends State<BuildReport> {
 
   Widget selectItem(int index) {
     return Card(
+      elevation: 10.0,
       child: ListTile(
         contentPadding: EdgeInsets.all(0),
-        title: Text(selectedMaterials[index][0].toString()),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(selectedMaterialsData[index][1].toString(),style: TextStyle(color: Colors.red),),
+            Text(selectedMaterialsData[index][0].toString())
+          ],
+        ),
         subtitle: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(4, (inindex) {
+          children: List.generate(device, (inindex) {
+            TextEditingController _controller =
+                selectedMaterialsControllers[index][inindex];
             return Expanded(
                 child: Padding(
               padding: const EdgeInsets.all(2.0),
-              child: TextFormField(
-                controller: selectedMaterialsControllers[index][inindex],
-                keyboardType: TextInputType.numberWithOptions(),
-                onSaved: (val) {
-                  selectedMaterials[index][inindex + 1] = val;
-                },
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    controller: _controller,
+                    keyboardType: TextInputType.numberWithOptions(),
+                    onSaved: (val) {
+                      selectedMaterialsData[index][inindex + 2] = val;
+                    },
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        labelText: "${inindex + 1}번",
+                        hintText: "${inindex + 1}번"),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.camera_enhance,
+                      size: 20.0,
                     ),
-                    labelText: "${inindex + 1}번",
-                    hintText: "${inindex + 1}번"),
+                    onPressed: () async {
+                      await scan.scan().then((barcode) {
+                        _controller.text = barcode;
+                      });
+                    },
+                  ),
+                ],
               ),
             ));
           }),
@@ -172,19 +227,20 @@ class _BuildReportState extends State<BuildReport> {
     );
   }
 
-  addMaterials() async {
+  addMaterials(String classfication) async {
     await SelectDialog.showModal(context, items: materials, onChange: (val) {
       if (val != '' || val != null) {
-        List mat = List.generate(5, (index) {
+        List mat = List.generate(device + 2, (index) {
           return '';
         });
-        List<TextEditingController> con = List.generate(5, (index) {
+        List<TextEditingController> con = List.generate(device + 2, (index) {
           return TextEditingController();
         });
         selectedMaterialsControllers.add(con);
         mat[0] = val;
+        mat[1] = classfication;
         setState(() {
-          selectedMaterials.add(mat);
+          selectedMaterialsData.add(mat);
         });
       }
     });
@@ -192,7 +248,7 @@ class _BuildReportState extends State<BuildReport> {
 
   deleteMaterials(int index) {
     setState(() {
-      selectedMaterials.removeAt(index);
+      selectedMaterialsData.removeAt(index);
       selectedMaterialsControllers.removeAt(index);
     });
   }

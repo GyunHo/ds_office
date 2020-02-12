@@ -86,6 +86,12 @@ class _FirestoreListViewState extends State<FirestoreListView> {
                 itemBuilder: (BuildContext context, int index) {
                   String doc = _list[index].data['document'].toString();
                   return InkWell(
+                    onLongPress: () async {
+                      await Firestore.instance
+                          .runTransaction((Transaction transaction) {
+                        return transaction.delete(_list[index].reference);
+                      });
+                    },
                     onTap: () async {
                       await bloc
                           .showDocument(context, _list[index])

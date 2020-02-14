@@ -52,6 +52,7 @@ class _BuildReportState extends State<BuildReport> {
         child: Container(),
         options: [
           FloatingActionButton(
+            heroTag: 'add',
             onPressed: () {
               addMaterials("설치");
             },
@@ -62,6 +63,7 @@ class _BuildReportState extends State<BuildReport> {
             backgroundColor: Colors.greenAccent,
           ),
           FloatingActionButton(
+            heroTag: "del",
             onPressed: () {
               addMaterials("철거");
             },
@@ -94,15 +96,17 @@ class _BuildReportState extends State<BuildReport> {
           )
         ],
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context, 'false');
+          },
+        ),
         title: Text(
-          '시설내역서',
+          '시설내역서 작성',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black,
-        leading: IconButton(
-          onPressed: widget.onMenuPressed,
-          icon: Icon(Icons.menu),
-        ),
       ),
       body: element == null
           ? Center(
@@ -180,7 +184,10 @@ class _BuildReportState extends State<BuildReport> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(selectedMaterialsData[index][1].toString(),style: TextStyle(color: Colors.red),),
+            Text(
+              selectedMaterialsData[index][1].toString(),
+              style: TextStyle(color: Colors.red),
+            ),
             Text(selectedMaterialsData[index][0].toString())
           ],
         ),

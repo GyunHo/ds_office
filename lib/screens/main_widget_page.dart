@@ -8,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kf_drawer/kf_drawer.dart';
 
+import 'build_list_page.dart';
+
 class MainWidget extends StatefulWidget {
   MainWidget({Key key, this.title}) : super(key: key);
   final String title;
@@ -48,7 +50,7 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
         KFDrawerItem.initWithPage(
           text: Text('시설내역서', style: TextStyle(color: Colors.white)),
           icon: Icon(Icons.receipt, color: Colors.white),
-          page: BuildReport(),
+          page: BuildListPage(),
         ),
       ],
     );

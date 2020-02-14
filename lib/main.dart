@@ -37,7 +37,14 @@ class MyApp extends StatelessWidget {
                 .document(uid)
                 .snapshots(),
             builder: (BuildContext con, AsyncSnapshot snap) {
-              if (snap?.data['auth']??false) {
+              if (snap.connectionState == ConnectionState.waiting) {
+                return MaterialApp(
+                  home: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+              if (snap?.data['auth'] ?? false) {
                 return MultiProvider(
                   providers: [
                     ChangeNotifierProvider<Bloc>(create: (_) => Bloc()),

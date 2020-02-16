@@ -40,6 +40,7 @@ class _QualityCheckPageState extends State<QualityListPage> {
       case "조치완료":
         color = Colors.blue.withOpacity(0.6);
         break;
+
     }
     return color;
   }

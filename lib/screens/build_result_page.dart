@@ -11,31 +11,64 @@ import 'package:select_dialog/select_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
-class BuildReport extends KFDrawerContent {
+class BuildReportDetail extends KFDrawerContent {
+  final DocumentSnapshot documentSnapshot;
+
+  BuildReportDetail(this.documentSnapshot);
+
   @override
-  _BuildReportState createState() => _BuildReportState();
+  _BuildReportDetailState createState() => _BuildReportDetailState();
 }
 
-class _BuildReportState extends State<BuildReport> {
+class _BuildReportDetailState extends State<BuildReportDetail> {
   DateTime date;
   String name;
-  int device = 4;
+  int device;
   String url =
       'https://spreadsheets.google.com/feeds/cells/1mWP4vOOjxK5aZNJFsTRzoUURXVISkQcTUC0FY7ym17I/1/public/full?alt=json';
   GlobalKey<FormState> _formkey = GlobalKey<FormState>();
+  List<TextEditingController> etc = [];
 
   Map<String, Widget> widgetList = {};
-  List<String> element;
+  List<String> initElement = [];
+  List<String> checkElement;
   List<String> materials;
+
   List<List> selectedMaterialsControllers = [];
-  List<String> checkedData = [];
   List<List> selectedMaterialsData = [];
+  List<String> checkedData = [];
   Map<String, dynamic> resultData = {};
 
   @override
   void initState() {
+    Map<String, dynamic> document = widget.documentSnapshot.data;
+    resultData = document;
+    device = document['device'] ?? 4;
+    Timestamp initDate = document['시설일'];
+    date = initDate.toDate();
+    etc.add(TextEditingController(text: '${document['국소명'] ?? '이름없는 국소'}'));
+    etc.add(TextEditingController(text: '${document['시설자'] ?? '시설자 불분명'}'));
+
+    List<dynamic> semiel = jsonDecode(document['check']);
+
+    for (var i in semiel) {
+      initElement.add(i.toString());
+      checkedData.add(i.toString());
+    }
+
+    List<dynamic> materials = jsonDecode(document['material']);
+
+    for (List i in materials) {
+      selectedMaterialsData.add(i);
+
+      List<TextEditingController> con = List.generate(i.length, (index) {
+        return TextEditingController(text: i[index]);
+      });
+      selectedMaterialsControllers.add(con);
+    }
+
     getJson().then((re) {
-      for (var i in element) {
+      for (var i in checkElement) {
         widgetList[i] = Text(
           i.toString(),
           overflow: TextOverflow.fade,
@@ -48,10 +81,10 @@ class _BuildReportState extends State<BuildReport> {
           .document(user.uid)
           .get()
           .then((doc) {
-        String username = doc?.data['name'] ?? '이름없음';
-        resultData['작성자'] = username;
+        name = doc?.data['name'] ?? '이름없음';
       });
     });
+
     super.initState();
   }
 
@@ -100,23 +133,26 @@ class _BuildReportState extends State<BuildReport> {
               onPressed: () async {
                 if (_formkey.currentState.validate() && date != null) {
                   _formkey.currentState.save();
-                  resultData['device'] = device;
                   resultData['check'] = jsonEncode(checkedData);
                   resultData['material'] = jsonEncode(selectedMaterialsData);
-                  Firestore.instance
-                      .collection('buildlist')
-                      .add(resultData)
-                      .whenComplete(() {
-                    Navigator.pop(context, true);
-                  }).catchError((e) {
-                    Scaffold.of(context).showSnackBar(SnackBar(
-                      content: Text('저장에 실패 했습니다. 다시 시도 하세요.'),
-                    ));
-                  });
+                  if(name==resultData['작성자']){
+                    Firestore.instance
+                        .runTransaction((Transaction transaction) async {
+                      await transaction
+                          .update(widget.documentSnapshot.reference, resultData)
+                          .whenComplete(() {
+                        Navigator.of(context).pop(true);
+                      }).catchError((e) {
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                          content: Text("수정 실패 하였습니다. 다시 시도해 주세요"),
+                        ));
+                      });
+                    });
+                  }
                 }
               },
               child: Text(
-                '저장',
+                name == resultData['작성자'] ? '수정' : '수정불가',
               ),
               color: Colors.white,
             ),
@@ -130,12 +166,12 @@ class _BuildReportState extends State<BuildReport> {
           },
         ),
         title: Text(
-          '시설내역서 작성',
+          '${widget.documentSnapshot.data['국소명'] ?? '이름없는 국소'}',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black,
       ),
-      body: element == null
+      body: checkElement == null
           ? Center(
               child: CircularProgressIndicator(),
             )
@@ -153,11 +189,11 @@ class _BuildReportState extends State<BuildReport> {
                       Row(
                         children: <Widget>[
                           Flexible(
-                            child: textThing("국소명", val: true),
+                            child: textThing("국소명", 0, val: true),
                             flex: 2,
                           ),
                           Flexible(
-                            child: textThing("시설자", val: true),
+                            child: textThing("시설자", 1, val: true),
                             flex: 1,
                           ),
                         ],
@@ -168,6 +204,7 @@ class _BuildReportState extends State<BuildReport> {
                           FlatButton(
                             onPressed: () async {
                               await DatePicker.showDatePicker(context,
+                                  currentTime: date ?? null,
                                   onConfirm: (writedate) {
                                 resultData['시설일'] = writedate;
                                 setState(() {
@@ -191,12 +228,12 @@ class _BuildReportState extends State<BuildReport> {
                         height: 50,
                         borderRadius: BorderRadius.circular(10),
                         borderWidth: 2,
-                        mainList: element,
+                        mainList: checkElement,
                         onSelectionChanged: (selectedList) {
                           checkedData = selectedList;
                         },
                         widgetList: widgetList,
-                        initialSelectionList: [],
+                        initialSelectionList: initElement ?? [],
                       ),
                       Expanded(
                         child: ListView.separated(
@@ -309,10 +346,11 @@ class _BuildReportState extends State<BuildReport> {
     });
   }
 
-  Widget textThing(String title, {bool val = false}) {
+  Widget textThing(String title, int index, {bool val = false}) {
     return Padding(
       padding: EdgeInsets.only(bottom: 5.0),
       child: TextFormField(
+        controller: etc[index],
         onChanged: (str) {
           resultData[title] = str;
         },
@@ -350,7 +388,7 @@ class _BuildReportState extends State<BuildReport> {
       }
     }
     setState(() {
-      element = checkData;
+      checkElement = checkData;
       materials = materialData;
     });
   }

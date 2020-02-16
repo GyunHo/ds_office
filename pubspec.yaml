@@ -17,6 +17,7 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
+  flutter_datetime_picker:
   fab_circular_menu:
   qrscan:
   animated_multi_select:

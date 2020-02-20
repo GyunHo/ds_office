@@ -48,6 +48,7 @@ class _BuildReportDetailState extends State<BuildReportDetail> {
     date = initDate.toDate();
     etc.add(TextEditingController(text: '${document['국소명'] ?? '이름없는 국소'}'));
     etc.add(TextEditingController(text: '${document['시설자'] ?? '시설자 불분명'}'));
+    etc.add(TextEditingController(text: '${document['기타의견'] ?? ''}'));
 
     List<dynamic> semiel = jsonDecode(document['check']);
 
@@ -235,6 +236,7 @@ class _BuildReportDetailState extends State<BuildReportDetail> {
                         widgetList: widgetList,
                         initialSelectionList: initElement ?? [],
                       ),
+                      etcText(2),
                       Expanded(
                         child: ListView.separated(
                             shrinkWrap: true,
@@ -344,6 +346,28 @@ class _BuildReportDetailState extends State<BuildReportDetail> {
       selectedMaterialsData.removeAt(index);
       selectedMaterialsControllers.removeAt(index);
     });
+  }
+  Widget etcText(int index) {
+    return Column(
+      children: <Widget>[
+        SizedBox(height: 2.0,),
+        TextFormField(
+          controller: etc[index],
+          decoration: InputDecoration(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(width: 2.0),
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
+              labelText: "기타 의견",
+              hintText: "기타 의견"),
+          maxLines: null,
+          onSaved: (val) {
+            resultData['기타의견'] = val;
+          },
+        ),
+      ],
+    );
   }
 
   Widget textThing(String title, int index, {bool val = false}) {

@@ -198,6 +198,7 @@ class _BuildReportState extends State<BuildReport> {
                         widgetList: widgetList,
                         initialSelectionList: [],
                       ),
+                      etcText(),
                       Expanded(
                         child: ListView.separated(
                             shrinkWrap: true,
@@ -332,6 +333,28 @@ class _BuildReportState extends State<BuildReport> {
         },
         onSaved: (value) {},
       ),
+    );
+  }
+
+  Widget etcText() {
+    return Column(
+      children: <Widget>[
+        SizedBox(height: 2.0,),
+        TextFormField(
+          decoration: InputDecoration(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(width: 2.0),
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
+              labelText: "기타 의견",
+              hintText: "기타 의견"),
+          maxLines: null,
+          onSaved: (val) {
+            resultData['기타의견'] = val;
+          },
+        ),
+      ],
     );
   }
 

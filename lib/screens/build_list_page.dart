@@ -25,6 +25,7 @@ class _BuildListPageState extends State<BuildListPage> {
           await Navigator.of(context).pushNamed("buildreport").then((re) {
             if (re == true) {
               Scaffold.of(context).showSnackBar(SnackBar(
+                duration: Duration(milliseconds: 500),
                 content: Text('저장에 성공 하였습니다.'),
               ));
             }
@@ -102,6 +103,7 @@ class _BuildListPageState extends State<BuildListPage> {
                                   .then((re) {
                                 if (re == true) {
                                   Scaffold.of(context).showSnackBar(SnackBar(
+                                    duration: Duration(milliseconds: 500),
                                     content: Text("내용 수정 완료"),
                                   ));
                                 }

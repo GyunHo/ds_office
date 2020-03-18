@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:select_dialog/select_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class BuildReport extends KFDrawerContent {
   @override
@@ -17,13 +18,14 @@ class BuildReport extends KFDrawerContent {
 }
 
 class _BuildReportState extends State<BuildReport> {
+  GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
   DateTime date;
   String name;
   int device = 4;
   String url =
       'https://spreadsheets.google.com/feeds/cells/1mWP4vOOjxK5aZNJFsTRzoUURXVISkQcTUC0FY7ym17I/1/public/full?alt=json';
   GlobalKey<FormState> _formkey = GlobalKey<FormState>();
-
+  bool _isUsing = false;
   Map<String, Widget> widgetList = {};
   List<String> element;
   List<String> materials;
@@ -58,171 +60,183 @@ class _BuildReportState extends State<BuildReport> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Scaffold(
-      floatingActionButton: FabCircularMenu(
-        ringColor: Colors.black.withOpacity(0.1),
-        fabColor: Colors.black,
-        fabOpenColor: Colors.red,
-        fabMargin: EdgeInsets.all(10.0),
-        child: Container(),
-        options: [
-          FloatingActionButton(
-            heroTag: 'add',
-            onPressed: () {
-              addMaterials("설치");
-            },
-            child: Text(
-              '설치',
-              style: TextStyle(color: Colors.black),
-            ),
-            backgroundColor: Colors.greenAccent,
-          ),
-          FloatingActionButton(
-            heroTag: "del",
-            onPressed: () {
-              addMaterials("철거");
-            },
-            child: Text(
-              '철거',
-              style: TextStyle(color: Colors.black),
-            ),
-            backgroundColor: Colors.greenAccent,
-          ),
-        ],
-        ringDiameter: size.width * 0.8,
-        ringWidth: size.width * 0.25,
-      ),
-      appBar: AppBar(
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: RaisedButton(
-              onPressed: () async {
-                if (_formkey.currentState.validate() && date != null) {
-                  _formkey.currentState.save();
-                  resultData['device'] = device;
-                  resultData['check'] = jsonEncode(checkedData);
-                  resultData['material'] = jsonEncode(selectedMaterialsData);
-                  Firestore.instance
-                      .collection('buildlist')
-                      .add(resultData)
-                      .whenComplete(() {
-                    Navigator.pop(context, true);
-                  }).catchError((e) {
-                    Scaffold.of(context).showSnackBar(SnackBar(
-                      content: Text('저장에 실패 했습니다. 다시 시도 하세요.'),
-                    ));
-                  });
-                }
+    return ModalProgressHUD(
+      inAsyncCall: _isUsing,
+      child: Scaffold(
+        key: _globalKey,
+        floatingActionButton: FabCircularMenu(
+          ringColor: Colors.black.withOpacity(0.1),
+          fabColor: Colors.black,
+          fabOpenColor: Colors.red,
+          fabMargin: EdgeInsets.all(10.0),
+          child: Container(),
+          options: [
+            FloatingActionButton(
+              heroTag: 'add',
+              onPressed: () {
+                addMaterials("설치");
               },
               child: Text(
-                '저장',
+                '설치',
+                style: TextStyle(color: Colors.black),
               ),
-              color: Colors.white,
+              backgroundColor: Colors.greenAccent,
             ),
-          )
-        ],
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.pop(context, 'false');
-          },
+            FloatingActionButton(
+              heroTag: "del",
+              onPressed: () {
+                addMaterials("철거");
+              },
+              child: Text(
+                '철거',
+                style: TextStyle(color: Colors.black),
+              ),
+              backgroundColor: Colors.greenAccent,
+            ),
+          ],
+          ringDiameter: size.width * 0.8,
+          ringWidth: size.width * 0.25,
         ),
-        title: Text(
-          '시설내역서 작성',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.black,
-      ),
-      body: element == null
-          ? Center(
-              child: CircularProgressIndicator(),
+        appBar: AppBar(
+          actions: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: RaisedButton(
+                onPressed: () async {
+                  _onToggle();
+                  if (_formkey.currentState.validate() && date != null) {
+                    _formkey.currentState.save();
+                    resultData['device'] = device;
+                    resultData['check'] = jsonEncode(checkedData);
+                    resultData['material'] = jsonEncode(selectedMaterialsData);
+                    Firestore.instance
+                        .collection('buildlist')
+                        .add(resultData)
+                        .whenComplete(() {
+                      Navigator.pop(context, true);
+                    }).catchError((e) {
+                      _offToggle();
+                      _globalKey.currentState.showSnackBar(SnackBar(
+                        content: Text('저장에 실패 했습니다. 다시 시도 하세요.'),
+                      ));
+                    });
+                  }
+                  else{
+                    _offToggle();
+                    _globalKey.currentState.showSnackBar(SnackBar(
+                      content: Text('국소명, 시설자명, 날짜는 필수 입니다.'),
+                    ));
+                  }
+                },
+                child: Text(
+                  '저장',
+                ),
+                color: Colors.white,
+              ),
             )
-          : Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: Container(
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    border: Border.all(color: Colors.black)),
-                padding: EdgeInsets.all(8.0),
-                child: Form(
-                  key: _formkey,
-                  child: Column(
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Flexible(
-                            child: textThing("국소명", val: true),
-                            flex: 2,
-                          ),
-                          Flexible(
-                            child: textThing("시설자", val: true),
-                            flex: 1,
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: <Widget>[
-                          Text('시설일 : '),
-                          FlatButton(
-                            onPressed: () async {
-                              await DatePicker.showDatePicker(context,
-                                  onConfirm: (writedate) {
-                                resultData['시설일'] = writedate;
-                                setState(() {
-                                  date = writedate;
-                                });
-                              }, locale: LocaleType.ko);
-                            },
-                            child: Text(
-                              date == null
-                                  ? '날짜선택'
-                                  : '${date.year}년 ${date.month}월 ${date.day}일',
-                              style: TextStyle(color: Colors.blue),
+          ],
+          centerTitle: true,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              Navigator.pop(context, 'false');
+            },
+          ),
+          title: Text(
+            '시설내역서 작성',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.black,
+        ),
+        body: element == null
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(5.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10.0),
+                      border: Border.all(color: Colors.black)),
+                  padding: EdgeInsets.all(8.0),
+                  child: Form(
+                    key: _formkey,
+                    child: Column(
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            Flexible(
+                              child: textThing("국소명", val: true),
+                              flex: 2,
                             ),
-                          ),
-                        ],
-                      ),
-                      MultiSelectChip(
-                        reverseScroll: false,
-                        color: Colors.greenAccent,
-                        width: 80,
-                        height: 50,
-                        borderRadius: BorderRadius.circular(10),
-                        borderWidth: 2,
-                        mainList: element,
-                        onSelectionChanged: (selectedList) {
-                          checkedData = selectedList;
-                        },
-                        widgetList: widgetList,
-                        initialSelectionList: [],
-                      ),
-                      etcText(),
-                      Expanded(
-                        child: ListView.separated(
-                            shrinkWrap: true,
-                            separatorBuilder: (context, index) {
-                              return Divider(
-                                color: Colors.red,
-                                thickness: 2.0,
-                              );
-                            },
-                            itemCount: selectedMaterialsData.length,
-                            itemBuilder: (context, index) {
-                              return InkWell(
-                                child: selectItem(index),
-                                onLongPress: () {
-                                  deleteMaterials(index);
-                                },
-                              );
-                            }),
-                      )
-                    ],
+                            Flexible(
+                              child: textThing("시설자", val: true),
+                              flex: 1,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Text('시설일 : '),
+                            FlatButton(
+                              onPressed: () async {
+                                await DatePicker.showDatePicker(context,
+                                    onConfirm: (writedate) {
+                                  resultData['시설일'] = writedate;
+                                  setState(() {
+                                    date = writedate;
+                                  });
+                                }, locale: LocaleType.ko);
+                              },
+                              child: Text(
+                                date == null
+                                    ? '날짜선택'
+                                    : '${date.year}년 ${date.month}월 ${date.day}일',
+                                style: TextStyle(color: Colors.blue),
+                              ),
+                            ),
+                          ],
+                        ),
+                        MultiSelectChip(
+                          reverseScroll: false,
+                          color: Colors.greenAccent,
+                          width: 80,
+                          height: 50,
+                          borderRadius: BorderRadius.circular(10),
+                          borderWidth: 2,
+                          mainList: element,
+                          onSelectionChanged: (selectedList) {
+                            checkedData = selectedList;
+                          },
+                          widgetList: widgetList,
+                          initialSelectionList: [],
+                        ),
+                        etcText(),
+                        Expanded(
+                          child: ListView.separated(
+                              shrinkWrap: true,
+                              separatorBuilder: (context, index) {
+                                return Divider(
+                                  color: Colors.red,
+                                  thickness: 2.0,
+                                );
+                              },
+                              itemCount: selectedMaterialsData.length,
+                              itemBuilder: (context, index) {
+                                return InkWell(
+                                  child: selectItem(index),
+                                  onLongPress: () {
+                                    deleteMaterials(index);
+                                  },
+                                );
+                              }),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
+      ),
     );
   }
 
@@ -375,6 +389,16 @@ class _BuildReportState extends State<BuildReport> {
     setState(() {
       element = checkData;
       materials = materialData;
+    });
+  }
+  void _onToggle(){
+    setState(() {
+      _isUsing = true;
+    });
+  }
+  void _offToggle(){
+    setState(() {
+      _isUsing = false;
     });
   }
 }

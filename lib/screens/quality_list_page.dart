@@ -40,7 +40,6 @@ class _QualityCheckPageState extends State<QualityListPage> {
       case "조치완료":
         color = Colors.blue.withOpacity(0.6);
         break;
-
     }
     return color;
   }
@@ -68,6 +67,14 @@ class _QualityCheckPageState extends State<QualityListPage> {
         ),
       ),
       appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.attachment),
+            onPressed: () {
+              exportList();
+            },
+          )
+        ],
         centerTitle: true,
         title: Text('품질점검'),
         backgroundColor: Colors.black,
@@ -195,6 +202,29 @@ class _QualityCheckPageState extends State<QualityListPage> {
         },
       ),
     );
+  }
+
+  exportList() async {
+    QuerySnapshot querySnapshot =
+        await Firestore.instance.collection('checklist').getDocuments();
+    List<DocumentSnapshot> documentSnapshots = querySnapshot.documents;
+    List<String> headers = [];
+    for (DocumentSnapshot snapshot in documentSnapshots) {
+      snapshot.data.forEach((k, v) {
+        if (v is Map) {
+          if (!headers.contains(k)) {
+            headers.addAll([k, '']);
+          }
+        }
+      });
+    }
+    List<String> secondHeaders = List.generate(headers.length, (int index) {
+      if (index % 2 == 0) {
+        return '점검결과';
+      }
+      return '기타의견';
+    });
+    print(secondHeaders);
   }
 
   Future<bool> ask() async {

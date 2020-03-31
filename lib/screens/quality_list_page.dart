@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:csv/csv.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ds_office/db/quality_check_bloc.dart';
 import 'package:ds_office/screens/quality_result_page_.dart';
@@ -5,6 +8,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kf_drawer/kf_drawer.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 
 class QualityListPage extends KFDrawerContent {
   @override
@@ -208,6 +213,7 @@ class _QualityCheckPageState extends State<QualityListPage> {
     QuerySnapshot querySnapshot =
         await Firestore.instance.collection('checklist').getDocuments();
     List<DocumentSnapshot> documentSnapshots = querySnapshot.documents;
+    List<List> rows = [];
     List<String> headers = [];
     for (DocumentSnapshot snapshot in documentSnapshots) {
       snapshot.data.forEach((k, v) {
@@ -224,7 +230,33 @@ class _QualityCheckPageState extends State<QualityListPage> {
       }
       return '기타의견';
     });
-    print(secondHeaders);
+    rows.add(headers);
+    rows.add(secondHeaders);
+    for (DocumentSnapshot snapshot in documentSnapshots) {
+      List data = List.filled(secondHeaders.length, '');
+      snapshot.data.forEach((k, v) {
+        if (v is Map) {
+          data[headers.indexOf(k)] = v['점검결과'];
+          data[headers.indexOf(k) + 1] = v['기타의견'];
+        }
+      });
+      rows.add(data);
+    }
+    String csvData = ListToCsvConverter().convert(rows);
+
+    Directory tempDir = await getTemporaryDirectory();
+//    Directory tempDir = await getExternalStorageDirectory();
+    String fileName = tempDir.path + '/checklist.csv';
+    File(fileName).create().then((File csvFile) {
+      csvFile.writeAsString(csvData);
+    });
+    Email email = Email(
+        attachmentPath: fileName,
+        body: '품질 체크 리스트 내보내기',
+        isHTML: true,
+        recipients: ['commandoo@hanmir.com'],
+        subject: '품질 체크 결과 내보내기');
+    FlutterEmailSender.send(email);
   }
 
   Future<bool> ask() async {

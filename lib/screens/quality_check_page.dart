@@ -74,20 +74,25 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
               padding: const EdgeInsets.all(8.0),
               child: RaisedButton(
                 onPressed: () async {
-                  _globalKey.currentState.save();
-                  data['점검일'] = DateTime.now();
-                  data['점검자'] = name;
-                  data['수정중'] = false;
+                  if (_globalKey.currentState.validate()) {
+                    _globalKey.currentState.save();
+                    data['점검일'] = DateTime.now();
+                    data['점검자'] = name;
 
-                  await bloc.addCheckList(data).then((res) {
-                    if (res == "성공") {
-                      Navigator.pop(context, true);
-                    } else {
-                      _scaffoldState.currentState.showSnackBar(SnackBar(
-                        content: Text('저장에 실패 하였습니다.'),
-                      ));
-                    }
-                  });
+                    await bloc.addCheckList(data).then((res) {
+                      if (res == "성공") {
+                        Navigator.pop(context, true);
+                      } else {
+                        _scaffoldState.currentState.showSnackBar(SnackBar(
+                          content: Text('저장에 실패 하였습니다.'),
+                        ));
+                      }
+                    });
+                  } else {
+                    _scaffoldState.currentState.showSnackBar(SnackBar(
+                      content: Text('국소명은 필수 입니다.'),
+                    ));
+                  }
                 },
                 child: Text('점검저장'),
                 color: Colors.white,
@@ -112,11 +117,16 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
                         padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: TextFormField(
                           controller: _title,
+                          validator: (val) {
+                            if (val.isEmpty) {
+                              return '국소명은 필수입니다.';
+                            } else {
+                              return null;
+                            }
+                          },
                           onSaved: (val) {
                             if (val.isNotEmpty) {
                               data['국소명'] = val;
-                            } else {
-                              data['국소명'] = '국소명 없음';
                             }
                           },
                           decoration: InputDecoration(
@@ -177,6 +187,11 @@ class _QualityCheckPageState extends State<QualityCheckPage> {
                                       Padding(
                                         padding: EdgeInsets.only(bottom: 10.0),
                                         child: TextFormField(
+                                          onChanged: (val) {
+                                            setState(() {
+                                              maps['기타의견'] = val;
+                                            });
+                                          },
                                           onSaved: (val) {
                                             if (val.isNotEmpty) {
                                               maps['기타의견'] = val;

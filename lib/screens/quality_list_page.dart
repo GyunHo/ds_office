@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:kf_drawer/kf_drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:share_extend/share_extend.dart';
 
 class QualityListPage extends KFDrawerContent {
   @override
@@ -209,7 +209,7 @@ class _QualityCheckPageState extends State<QualityListPage> {
     );
   }
 
-  exportList() async {
+  Future<void> exportList() async {
     QuerySnapshot querySnapshot =
         await Firestore.instance.collection('checklist').getDocuments();
     List<DocumentSnapshot> documentSnapshots = querySnapshot.documents;
@@ -230,33 +230,48 @@ class _QualityCheckPageState extends State<QualityListPage> {
       }
       return '기타의견';
     });
-    rows.add(headers);
-    rows.add(secondHeaders);
     for (DocumentSnapshot snapshot in documentSnapshots) {
-      List data = List.filled(secondHeaders.length, '');
+      List title = List.generate(4, (int gen) => '');
+      List data = List.generate(secondHeaders.length, (int gen) => '');
       snapshot.data.forEach((k, v) {
         if (v is Map) {
           data[headers.indexOf(k)] = v['점검결과'];
           data[headers.indexOf(k) + 1] = v['기타의견'];
         }
+        switch (k) {
+          case '국소명':
+            title[0] = v;
+            break;
+          case '점검자':
+            title[1] = v;
+            break;
+          case '점검일':
+            Timestamp timestamp = v;
+            DateTime dateTime = timestamp.toDate();
+            String date = '${dateTime.year}-${dateTime.month}-${dateTime.day}';
+            title[2] = date;
+            break;
+          case '최종결과':
+            title[3] = v;
+            break;
+        }
       });
+      data.insertAll(0, title);
       rows.add(data);
     }
+    headers.insertAll(0, ['국소명', '점검자', '점검일', '최종결과']);
+    secondHeaders.insertAll(0, ['국소명', '점검자', '점검일', '최종결과']);
+    rows.insert(0, headers);
+    rows.insert(1, secondHeaders);
     String csvData = ListToCsvConverter().convert(rows);
 
     Directory tempDir = await getTemporaryDirectory();
-//    Directory tempDir = await getExternalStorageDirectory();
     String fileName = tempDir.path + '/checklist.csv';
     File(fileName).create().then((File csvFile) {
-      csvFile.writeAsString(csvData);
+      csvFile.writeAsString(csvData).then((File file) {
+        ShareExtend.share(file.path, 'file');
+      });
     });
-    Email email = Email(
-        attachmentPath: fileName,
-        body: '품질 체크 리스트 내보내기',
-        isHTML: true,
-        recipients: ['commandoo@hanmir.com'],
-        subject: '품질 체크 결과 내보내기');
-    FlutterEmailSender.send(email);
   }
 
   Future<bool> ask() async {

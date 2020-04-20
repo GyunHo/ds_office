@@ -266,7 +266,7 @@ class _QualityCheckPageState extends State<QualityListPage> {
     String csvData = ListToCsvConverter().convert(rows);
 
     Directory tempDir = await getTemporaryDirectory();
-    String fileName = tempDir.path + '/checklist.csv';
+    String fileName = tempDir.path + '/checklist.txt';
     File(fileName).create().then((File csvFile) {
       csvFile.writeAsString(csvData).then((File file) {
         ShareExtend.share(file.path, 'file');

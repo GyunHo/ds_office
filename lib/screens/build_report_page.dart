@@ -18,6 +18,8 @@ class BuildReport extends KFDrawerContent {
 }
 
 class _BuildReportState extends State<BuildReport> {
+  final GlobalKey<FabCircularMenuState> _fabCircleKey = GlobalKey<
+      FabCircularMenuState>();
   GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
   DateTime date;
   String name;
@@ -59,39 +61,33 @@ class _BuildReportState extends State<BuildReport> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    Size size = MediaQuery
+        .of(context)
+        .size;
     return ModalProgressHUD(
       inAsyncCall: _isUsing,
       child: Scaffold(
         key: _globalKey,
         floatingActionButton: FabCircularMenu(
+          key:_fabCircleKey,
           ringColor: Colors.black.withOpacity(0.1),
           fabColor: Colors.black,
           fabOpenColor: Colors.red,
           fabMargin: EdgeInsets.all(10.0),
-          child: Container(),
-          options: [
-            FloatingActionButton(
-              heroTag: 'add',
+          children: <Widget>[
+            OutlineButton(
               onPressed: () {
                 addMaterials("설치");
+                _fabCircleKey.currentState.close();
               },
-              child: Text(
-                '설치',
-                style: TextStyle(color: Colors.black),
-              ),
-              backgroundColor: Colors.greenAccent,
+              child: Text('설치'),
             ),
-            FloatingActionButton(
-              heroTag: "del",
+            OutlineButton(
               onPressed: () {
                 addMaterials("철거");
+                _fabCircleKey.currentState.close();
               },
-              child: Text(
-                '철거',
-                style: TextStyle(color: Colors.black),
-              ),
-              backgroundColor: Colors.greenAccent,
+              child: Text('철거'),
             ),
           ],
           ringDiameter: size.width * 0.8,
@@ -120,8 +116,7 @@ class _BuildReportState extends State<BuildReport> {
                         content: Text('저장에 실패 했습니다. 다시 시도 하세요.'),
                       ));
                     });
-                  }
-                  else{
+                  } else {
                     _offToggle();
                     _globalKey.currentState.showSnackBar(SnackBar(
                       content: Text('국소명, 시설자명, 날짜는 필수 입니다.'),
@@ -150,92 +145,92 @@ class _BuildReportState extends State<BuildReport> {
         ),
         body: element == null
             ? Center(
-                child: CircularProgressIndicator(),
-              )
+          child: CircularProgressIndicator(),
+        )
             : Padding(
-                padding: const EdgeInsets.all(5.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
-                      border: Border.all(color: Colors.black)),
-                  padding: EdgeInsets.all(8.0),
-                  child: Form(
-                    key: _formkey,
-                    child: Column(
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Flexible(
-                              child: textThing("국소명", val: true),
-                              flex: 2,
-                            ),
-                            Flexible(
-                              child: textThing("시설자", val: true),
-                              flex: 1,
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Text('시설일 : '),
-                            FlatButton(
-                              onPressed: () async {
-                                await DatePicker.showDatePicker(context,
-                                    onConfirm: (writedate) {
-                                  resultData['시설일'] = writedate;
-                                  setState(() {
-                                    date = writedate;
-                                  });
-                                }, locale: LocaleType.ko);
-                              },
-                              child: Text(
-                                date == null
-                                    ? '날짜선택'
-                                    : '${date.year}년 ${date.month}월 ${date.day}일',
-                                style: TextStyle(color: Colors.blue),
-                              ),
-                            ),
-                          ],
-                        ),
-                        MultiSelectChip(
-                          reverseScroll: false,
-                          color: Colors.greenAccent,
-                          width: 80,
-                          height: 50,
-                          borderRadius: BorderRadius.circular(10),
-                          borderWidth: 2,
-                          mainList: element,
-                          onSelectionChanged: (selectedList) {
-                            checkedData = selectedList;
-                          },
-                          widgetList: widgetList,
-                          initialSelectionList: [],
-                        ),
-                        etcText(),
-                        Expanded(
-                          child: ListView.separated(
-                              shrinkWrap: true,
-                              separatorBuilder: (context, index) {
-                                return Divider(
-                                  color: Colors.red,
-                                  thickness: 2.0,
-                                );
-                              },
-                              itemCount: selectedMaterialsData.length,
-                              itemBuilder: (context, index) {
-                                return InkWell(
-                                  child: selectItem(index),
-                                  onLongPress: () {
-                                    deleteMaterials(index);
-                                  },
-                                );
-                              }),
-                        )
-                      ],
-                    ),
+          padding: const EdgeInsets.all(5.0),
+          child: Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0),
+                border: Border.all(color: Colors.black)),
+            padding: EdgeInsets.all(8.0),
+            child: Form(
+              key: _formkey,
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Flexible(
+                        child: textThing("국소명", val: true),
+                        flex: 2,
+                      ),
+                      Flexible(
+                        child: textThing("시설자", val: true),
+                        flex: 1,
+                      ),
+                    ],
                   ),
-                ),
+                  Row(
+                    children: <Widget>[
+                      Text('시설일 : '),
+                      FlatButton(
+                        onPressed: () async {
+                          await DatePicker.showDatePicker(context,
+                              onConfirm: (writedate) {
+                                resultData['시설일'] = writedate;
+                                setState(() {
+                                  date = writedate;
+                                });
+                              }, locale: LocaleType.ko);
+                        },
+                        child: Text(
+                          date == null
+                              ? '날짜선택'
+                              : '${date.year}년 ${date.month}월 ${date.day}일',
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      ),
+                    ],
+                  ),
+                  MultiSelectChip(
+                    reverseScroll: false,
+                    color: Colors.greenAccent,
+                    width: 80,
+                    height: 50,
+                    borderRadius: BorderRadius.circular(10),
+                    borderWidth: 2,
+                    mainList: element,
+                    onSelectionChanged: (selectedList) {
+                      checkedData = selectedList;
+                    },
+                    widgetList: widgetList,
+                    initialSelectionList: [],
+                  ),
+                  etcText(),
+                  Expanded(
+                    child: ListView.separated(
+                        shrinkWrap: true,
+                        separatorBuilder: (context, index) {
+                          return Divider(
+                            color: Colors.red,
+                            thickness: 2.0,
+                          );
+                        },
+                        itemCount: selectedMaterialsData.length,
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            child: selectItem(index),
+                            onLongPress: () {
+                              deleteMaterials(index);
+                            },
+                          );
+                        }),
+                  )
+                ],
               ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -259,39 +254,39 @@ class _BuildReportState extends State<BuildReport> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(device, (inindex) {
             TextEditingController _controller =
-                selectedMaterialsControllers[index][inindex + 2];
+            selectedMaterialsControllers[index][inindex + 2];
             return Expanded(
                 child: Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                    controller: _controller,
-                    keyboardType: TextInputType.numberWithOptions(),
-                    onSaved: (val) {
-                      selectedMaterialsData[index][inindex + 2] = val;
-                    },
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.0),
+                  padding: const EdgeInsets.all(2.0),
+                  child: Column(
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _controller,
+                        keyboardType: TextInputType.numberWithOptions(),
+                        onSaved: (val) {
+                          selectedMaterialsData[index][inindex + 2] = val;
+                        },
+                        decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            labelText: "${inindex + 1}번",
+                            hintText: "${inindex + 1}번"),
+                      ),
+                      InkWell(
+                        child: Text(
+                          "바코드스캔",
+                          style: TextStyle(color: Colors.blue),
                         ),
-                        labelText: "${inindex + 1}번",
-                        hintText: "${inindex + 1}번"),
+                        onTap: () async {
+                          await scan.scan().then((barcode) {
+                            _controller.text = barcode;
+                          });
+                        },
+                      ),
+                    ],
                   ),
-                  InkWell(
-                    child: Text(
-                      "바코드스캔",
-                      style: TextStyle(color: Colors.blue),
-                    ),
-                    onTap: () async {
-                      await scan.scan().then((barcode) {
-                        _controller.text = barcode;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ));
+                ));
           }),
         ),
       ),
@@ -353,14 +348,17 @@ class _BuildReportState extends State<BuildReport> {
   Widget etcText() {
     return Column(
       children: <Widget>[
-        SizedBox(height: 2.0,),
+        SizedBox(
+          height: 2.0,
+        ),
         TextFormField(
           decoration: InputDecoration(
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(width: 2.0),
                 borderRadius: BorderRadius.circular(5.0),
               ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
+              border:
+              OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
               labelText: "기타 의견",
               hintText: "기타 의견"),
           maxLines: null,
@@ -391,12 +389,14 @@ class _BuildReportState extends State<BuildReport> {
       materials = materialData;
     });
   }
-  void _onToggle(){
+
+  void _onToggle() {
     setState(() {
       _isUsing = true;
     });
   }
-  void _offToggle(){
+
+  void _offToggle() {
     setState(() {
       _isUsing = false;
     });

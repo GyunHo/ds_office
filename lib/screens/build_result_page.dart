@@ -21,6 +21,8 @@ class BuildReportDetail extends KFDrawerContent {
 }
 
 class _BuildReportDetailState extends State<BuildReportDetail> {
+  final GlobalKey<FabCircularMenuState> _fabCircleKey = GlobalKey<
+      FabCircularMenuState>();
   DateTime date;
   String name;
   int device;
@@ -94,33 +96,25 @@ class _BuildReportDetailState extends State<BuildReportDetail> {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       floatingActionButton: FabCircularMenu(
+        key: _fabCircleKey,
         ringColor: Colors.black.withOpacity(0.1),
         fabColor: Colors.black,
         fabOpenColor: Colors.red,
         fabMargin: EdgeInsets.all(10.0),
-        child: Container(),
-        options: [
-          FloatingActionButton(
-            heroTag: 'add',
+        children: <Widget>[
+          OutlineButton(
             onPressed: () {
               addMaterials("설치");
+              _fabCircleKey.currentState.close();
             },
-            child: Text(
-              '설치',
-              style: TextStyle(color: Colors.black),
-            ),
-            backgroundColor: Colors.greenAccent,
+            child: Text('설치'),
           ),
-          FloatingActionButton(
-            heroTag: "del",
+          OutlineButton(
             onPressed: () {
               addMaterials("철거");
+              _fabCircleKey.currentState.close();
             },
-            child: Text(
-              '철거',
-              style: TextStyle(color: Colors.black),
-            ),
-            backgroundColor: Colors.greenAccent,
+            child: Text('철거'),
           ),
         ],
         ringDiameter: size.width * 0.8,
@@ -136,7 +130,7 @@ class _BuildReportDetailState extends State<BuildReportDetail> {
                   _formkey.currentState.save();
                   resultData['check'] = jsonEncode(checkedData);
                   resultData['material'] = jsonEncode(selectedMaterialsData);
-                  if(name==resultData['작성자']){
+                  if (name == resultData['작성자']) {
                     Firestore.instance
                         .runTransaction((Transaction transaction) async {
                       await transaction
@@ -347,10 +341,13 @@ class _BuildReportDetailState extends State<BuildReportDetail> {
       selectedMaterialsControllers.removeAt(index);
     });
   }
+
   Widget etcText(int index) {
     return Column(
       children: <Widget>[
-        SizedBox(height: 2.0,),
+        SizedBox(
+          height: 2.0,
+        ),
         TextFormField(
           controller: etc[index],
           decoration: InputDecoration(
@@ -358,7 +355,8 @@ class _BuildReportDetailState extends State<BuildReportDetail> {
                 borderSide: BorderSide(width: 2.0),
                 borderRadius: BorderRadius.circular(5.0),
               ),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
               labelText: "기타 의견",
               hintText: "기타 의견"),
           maxLines: null,

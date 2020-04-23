@@ -16,6 +16,7 @@ class QualityResultDetail extends StatefulWidget {
 }
 
 class _QualityResultDetailState extends State<QualityResultDetail> {
+
   String name, uid;
   Map<String, dynamic> check = Map();
   Map<String, dynamic> info = Map();

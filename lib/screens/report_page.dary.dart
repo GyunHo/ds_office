@@ -1,5 +1,4 @@
 import 'package:ds_office/db/bloc.dart';
-import 'package:ds_office/screens/barcode_scan_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,14 +30,6 @@ class _ReportPageState extends State<ReportPage> {
                   _textEditingController.clear();
                   title = '';
                 }),
-            IconButton(
-              icon: Icon(Icons.camera_enhance),
-              onPressed: () {
-                bloc.clearBarCodes();
-                Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) => ScanPage()));
-              },
-            )
           ],
           backgroundColor: Colors.black,
           title: Text(

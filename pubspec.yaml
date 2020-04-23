@@ -11,7 +11,7 @@ description: A new Flutter application.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 5.0.0+11
+version: 5.0.0+12
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -29,7 +29,6 @@ dependencies:
   location:
   grouped_buttons:
   custom_radio_grouped_button:
-  flutter_qr_scanner:
   flutter_map:
   http:
   slide_popup_dialog:

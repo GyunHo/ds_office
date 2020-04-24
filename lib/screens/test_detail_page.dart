@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ds_office/db/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kf_drawer/kf_drawer.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +16,7 @@ class TestDetailPage extends KFDrawerContent {
 }
 
 class _TestDetailPageState extends State<TestDetailPage> {
+  GlobalKey<ScaffoldState> globalKey = GlobalKey<ScaffoldState>();
   TextEditingController _controller = TextEditingController();
   bool _isLoading = false;
 
@@ -29,6 +31,7 @@ class _TestDetailPageState extends State<TestDetailPage> {
     final bloc = Provider.of<Bloc>(context);
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      key: globalKey,
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: Text(
@@ -76,7 +79,15 @@ class _TestDetailPageState extends State<TestDetailPage> {
               '내용복사',
               style: TextStyle(color: Colors.white),
             ),
-            onPressed: () {},
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: _controller.text))
+                  .whenComplete(() {
+                globalKey.currentState.showSnackBar(SnackBar(
+                  content: Text('복사완료'),
+                  duration: Duration(milliseconds: 500),
+                ));
+              });
+            },
           ),
         ),
         ButtonTheme(
@@ -105,7 +116,8 @@ class _TestDetailPageState extends State<TestDetailPage> {
                   Navigator.of(context).pop('수정완료');
                 }).catchError((e) {
                   _isLoading = false;
-                  Scaffold.of(context).showSnackBar(SnackBar(
+                  globalKey.currentState.showSnackBar(SnackBar(
+                    duration: Duration(milliseconds: 500),
                     content: Text('다시 시도해 주세요'),
                   ));
                 });

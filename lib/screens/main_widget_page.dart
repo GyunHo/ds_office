@@ -1,9 +1,6 @@
-import 'package:ds_office/db/quality_check_bloc.dart';
-import 'package:ds_office/screens/build_report_page.dart';
-import 'package:ds_office/screens/cloud_page.dart';
+import 'package:ds_office/screens/test_list_page.dart';
 import 'package:ds_office/screens/quality_list_page.dart';
-import 'package:ds_office/screens/report_page.dary.dart';
-import 'package:ds_office/screens/sensingmap_page.dart';
+import 'package:ds_office/screens/test_report_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kf_drawer/kf_drawer.dart';
@@ -25,27 +22,17 @@ class _MainWidgetState extends State<MainWidget> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _drawerController = KFDrawerController(
-      initialPage: ReportPage(),
+      initialPage: TestListPage(),
       items: [
         KFDrawerItem.initWithPage(
-          text: Text('보고서 작성', style: TextStyle(color: Colors.white)),
-          icon: Icon(Icons.library_books, color: Colors.white),
-          page: ReportPage(),
+          text: Text('시험개통결과', style: TextStyle(color: Colors.white)),
+          icon: Icon(Icons.cloud, color: Colors.white),
+          page: TestListPage(),
         ),
         KFDrawerItem.initWithPage(
           text: Text('품질점검', style: TextStyle(color: Colors.white)),
           icon: Icon(Icons.receipt, color: Colors.white),
           page: QualityListPage(),
-        ),
-        KFDrawerItem.initWithPage(
-          text: Text('센싱', style: TextStyle(color: Colors.white)),
-          icon: Icon(Icons.map, color: Colors.white),
-          page: SensingMap(),
-        ),
-        KFDrawerItem.initWithPage(
-          text: Text('클라우드', style: TextStyle(color: Colors.white)),
-          icon: Icon(Icons.cloud, color: Colors.white),
-          page: CloudPage(),
         ),
         KFDrawerItem.initWithPage(
           text: Text('시설내역서', style: TextStyle(color: Colors.white)),

@@ -1,24 +1,42 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ds_office/db/bloc.dart';
+import 'package:ds_office/screens/test_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:kf_drawer/kf_drawer.dart';
 import 'package:provider/provider.dart';
 
-class CloudPage extends KFDrawerContent {
+class TestListPage extends KFDrawerContent {
   @override
   _CloudPageState createState() => _CloudPageState();
 }
 
-class _CloudPageState extends State<CloudPage> {
+class _CloudPageState extends State<TestListPage> {
   @override
   Widget build(BuildContext context) {
     final bloc = Provider.of<Bloc>(context);
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black,
+        onPressed: () async {
+          await Navigator.pushNamed(context, 'testreport').then((res) {
+            if (res != null) {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                duration: Duration(milliseconds: 500),
+                content: Text(res.toString()),
+              ));
+            }
+          });
+        },
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+      ),
       resizeToAvoidBottomPadding: false,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         centerTitle: true,
-        title: Text('클라우드'),
+        title: Text('시험개통결과'),
         backgroundColor: Colors.black,
         leading: IconButton(
           onPressed: widget.onMenuPressed,
@@ -79,7 +97,7 @@ class _FirestoreListViewState extends State<FirestoreListView> {
           Flexible(
             child: GestureDetector(
               onTap: () {
-                FocusScope.of(context).requestFocus(FocusNode());
+                FocusScope.of(context).unfocus();
               },
               child: ListView.builder(
                 itemCount: _list.length,
@@ -93,16 +111,17 @@ class _FirestoreListViewState extends State<FirestoreListView> {
                       });
                     },
                     onTap: () async {
-                      await bloc
-                          .showDocument(context, _list[index])
+                      await Navigator.of(context)
+                          .push(MaterialPageRoute(
+                              builder: (context) =>
+                                  TestDetailPage(_list[index])))
                           .then((res) {
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                          content: Text(res),
-                          duration: Duration(milliseconds: 1000),
-                        ));
-                      }).catchError((e) {
-                        print("클라우드 페이지에서 다이어로그 팝시 리턴 String 없음");
-                        return null;
+                        if (res != null) {
+                          Scaffold.of(context).showSnackBar(SnackBar(
+                            duration: Duration(milliseconds: 500),
+                            content: Text(res.toString(),),
+                          ));
+                        }
                       });
                     },
                     child: Card(
@@ -113,53 +132,6 @@ class _FirestoreListViewState extends State<FirestoreListView> {
                       ),
                     ),
                   );
-
-//              return ListTile(
-//                title: Container(
-//                  decoration: BoxDecoration(
-//                    borderRadius: BorderRadius.circular(5.0),
-//                    border: Border.all(color: Colors.black),
-//                  ),
-//                  padding: EdgeInsets.all(5.0),
-//                  child: Row(
-//                    children: <Widget>[
-//                      Expanded(
-//                        child: !_list[index].data['editing']
-//                            ? Text(title)
-//                            : TextFormField(
-//                          autofocus: true,
-//                                maxLines: null,
-//                                initialValue: docs,
-//                                onFieldSubmitted: (String val) {
-//                                  Firestore.instance.runTransaction(
-//                                      (Transaction transaction) async {
-//                                    DocumentSnapshot snapshot =
-//                                        await transaction
-//                                            .get(_list[index].reference);
-//                                    await transaction.update(
-//                                        snapshot.reference, {
-//                                      'title': val,
-//                                      'editing': !_list[index].data['editing']
-//                                    });
-//                                  });
-//                                },
-//                              ),
-//                      ),
-//                    ],
-//                  ),
-//                ),
-//                onTap: () {
-//
-//                  return Firestore.instance
-//                      .runTransaction((Transaction transaction) async {
-//                    DocumentSnapshot snapshot =
-//                    await transaction.get(_list[index].reference);
-//
-//                    await transaction.update(
-//                        snapshot.reference, {'editing': !snapshot['editing']});
-//                  });
-//                }
-//              );
                 },
               ),
             ),
